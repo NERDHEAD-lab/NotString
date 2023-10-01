@@ -2,14 +2,17 @@ package kr.nerdlab.util.notstring;
 
 import kr.nerdlab.lang.exception.NotStringIsNullException;
 import kr.nerdlab.util.notstring.env.NotStringType;
+import kr.nerdlab.util.notstring.handler.NotToStringHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.logging.Logger;
+import org.junit.platform.commons.logging.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
 public class NotStringTest {
-//	Logger logger = LoggerFactory.getLogger(NotStringTest.class);
+	Logger logger = LoggerFactory.getLogger(NotStringTest.class);
 
 	@Test
 	public void replaceStringTest() {
@@ -46,7 +49,7 @@ public class NotStringTest {
 		NotString<String> notString = NotString.from(testString, Map.of("name", "nerdlab"));
 		notString.put("what", null);
 		Assertions.assertEquals(
-				"this is nerdlab's ${what}",
+				"this is nerdlab's story",
 				notString.toString()
 		);
 	}
@@ -69,7 +72,7 @@ public class NotStringTest {
 		NotString<String> notString = NotString.from(testString, map);
 
 		Assertions.assertEquals(
-				testString,
+				"this is #{name}'s ${what}",
 				notString.toNotString()
 		);
 	}
@@ -97,9 +100,20 @@ public class NotStringTest {
 		NotString<String> notString = NotString.from(
 				testString,
 				map,
-				(key, value) -> {
-					/*"[" + key + " = " + value + "]"*/
-					return String.format("[%s = %s]", key, value);
+//				(key, value) -> {
+//					/*"[" + key + " = " + value + "]"*/
+//					return String.format("[%s = %s]", key, value);
+//				}
+				new NotToStringHandler<>() {
+					@Override
+					public String handle(String key, String value) {
+						return String.format("[%s = %s]", key, value);
+					}
+
+					@Override
+					public String toString(String key, String value) {
+						return value;
+					}
 				}
 		);
 
@@ -116,15 +130,23 @@ public class NotStringTest {
 		NotString<List<String>> notString = NotString.from(
 				testString,
 				map,
-				(key, value) -> {
-					return String.format("[%s = %s]", key, value.get(1));
+
+				new NotToStringHandler<>() {
+					@Override
+					public String handle(String key, String value) {
+						return String.format("[%s = %s]", key, value);
+					}
+
+					@Override
+					public String toString(String key, List<String> value) {
+						return value.get(1);
+					}
 				}
 		);
 
 		Assertions.assertEquals(
-				"this is [name = nerdlab]'s story",
+				"this is [name = nerdlab]'s [what = story]",
 				notString.toString()
 		);
-
 	}
 }
