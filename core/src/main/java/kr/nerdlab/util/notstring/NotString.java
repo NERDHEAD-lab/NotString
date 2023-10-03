@@ -159,31 +159,7 @@ public class NotString<VALUE> {
 		for (Map.Entry<String, VALUE> entry : mapper.entrySet()) {
 			String key = entry.getKey();
 			VALUE value = entry.getValue();
-//			String valueString;
-//			String temp;
-//			if (value != null) {
-//				valueString = valueHandler.handle(key, value);
-//			} else {
-//				valueString = defaultValueHandler.handle(key, defaultValues.get(key));
-//			}
-//			temp = result.replace(
-//					getStart(NotStringType.NULLABLE) + key + getEnd(NotStringType.NULLABLE),
-//					valueString
-//			);
-//
-//			if (!temp.equals(result) && value != null) {
-//				result = temp;
-//			}
-//
-//			temp = result.replace(
-//					getStart(NotStringType.NOTNULL) + key + getEnd(NotStringType.NOTNULL),
-//					valueString
-//			);
-//			if (!temp.equals(result) && value != null) {
-//				result = temp;
-//			} else {
-//				throw new NotStringIsNullException(String.format("NotString value is null: %s%s%s", getStart(NotStringType.NOTNULL), key, getEnd(NotStringType.NOTNULL)));
-//			}
+
 			result = toStringWithNotNull(result, key, value);
 			result = toStringWithNullable(result, key, value);
 		}
@@ -194,18 +170,21 @@ public class NotString<VALUE> {
 	private String toStringWithNotNull(String result, String key, VALUE value) {
 		String keyPattern = startWith(NotStringType.NOTNULL) + key + endWith(NotStringType.NOTNULL);
 		String defaultValue = defaultValues.get(key);
-		String valueString;
 
 		if (!result.contains(keyPattern)) { //result에 key가 없을 경우 처리안함
 			return result;
 		} else if (value == null && defaultValue == null) { //value와 defaultValue가 모두 null일 경우 처리안함
 			return result;
 		}
+
+
+		String valueString;
 		if (value == null) { //value가 null일 경우 defaultValue로 대체
 			valueString = defaultValueHandler.toString(key, defaultValue);
+		} else {
+			valueString = valueHandler.toString(key, value);
 		}
 		//value가 null이 아닐 경우 value로 대체
-		valueString = valueHandler.toString(key, value);//value가 null이 아닐 경우 value를 String으로 변환하는 로직이 필요함.
 		return result.replace(keyPattern, valueHandler.handle(key, valueString));
 
 	}
@@ -225,8 +204,7 @@ public class NotString<VALUE> {
 		if (value == null) { //value가 null일 경우 defaultValue로 대체
 			valueString = defaultValueHandler.toString(key, defaultValue);
 		} else { //value가 null이 아닐 경우 value로 대체
-			//value에서 String을 뽑아내는 로직과, 조합하는 로직을 분리해야함.
-			valueString = valueHandler.toString(key, value);//value가 null이 아닐 경우 value를 String으로 변환하는 로직이 필요함.
+			valueString = valueHandler.toString(key, value);
 		}
 
 		return notString.replace(keyPattern, valueHandler.handle(key, valueString));
