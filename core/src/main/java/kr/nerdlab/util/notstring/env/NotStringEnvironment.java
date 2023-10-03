@@ -19,6 +19,11 @@ public class NotStringEnvironment {
 		return this;
 	}
 
+	public NotStringEnvironment disableWhatIsNot(NotStringType type) {
+		notStringStartAndEnd.put(type, Pair.empty());
+		return this;
+	}
+
 	private Pair<String> pair(NotStringType type) {
 		return notStringStartAndEnd.get(type);
 	}

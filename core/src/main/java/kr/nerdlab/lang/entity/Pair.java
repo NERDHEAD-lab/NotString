@@ -13,6 +13,10 @@ public class Pair<TYPE> {
 		return new Pair<>(a, b);
 	}
 
+	public static <TYPE> Pair<TYPE> empty() {
+		return new Pair<>(null, null);
+	}
+
 	public TYPE first() {
 		return first;
 	}

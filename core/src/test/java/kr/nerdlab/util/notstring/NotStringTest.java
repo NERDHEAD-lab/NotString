@@ -149,4 +149,21 @@ public class NotStringTest {
 				notString.toString()
 		);
 	}
+
+	@Test
+	public void disableWhatIsNotTest() {
+		NotString.DEFAULT_CONFIGS
+				.disableWhatIsNot(NotStringType.NULLABLE)
+				.disableWhatIsNot(NotStringType.NOTNULL);
+
+		String testString = "this is #{name}'s ${what:story}";
+		Map<String, String> map = Map.of("name", "nerdlab");
+		NotString<String> notString = NotString.from(testString, map);
+
+		Assertions.assertEquals(
+				testString,
+				notString.toString()
+		);
+	}
+
 }
