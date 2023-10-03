@@ -78,6 +78,7 @@ public class NotString<VALUE> {
 	}
 
 	private String escapeRegex(String start) {
+		if (start == null) return null;
 
 		for (String escape : escapeLists) {
 			start = start.replace(escape, "\\" + escape);
