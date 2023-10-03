@@ -39,6 +39,7 @@ public class NotString<VALUE> {
 		//#{key:defaultValue} -> defaultValue
 		//${key:defaultValue} -> defaultValue
 
+		notString = originalNotString;
 		for (NotStringType type : NotStringType.values()) {
 			String start = escapeRegex(startWith(type));
 			String end = escapeRegex(endWith(type));
@@ -46,15 +47,15 @@ public class NotString<VALUE> {
 
 			String pattern = String.format("%s(?<key>[^:}]+)(?::(?<defaultValue>[^}]+))?%s", start, end);
 			Pattern compile = Pattern.compile(pattern);
-			Matcher matcher = compile.matcher(originalNotString);
+			Matcher matcher = compile.matcher(notString);
 
 
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			while (matcher.find()) {
 				String key = matcher.group("key"); // Extract the key
 				String value = matcher.group("defaultValue"); // Extract the default value
 
-				value = (value != null && !value.isEmpty()) ? value : "null";
+				value = (value == null || value.isEmpty()) ? null : value;
 				matcher.appendReplacement(sb, start + key + end);
 
 				defaultValues.put(key, value);
@@ -109,6 +110,10 @@ public class NotString<VALUE> {
 	}
 
 	public String getNotString() {
+		return toNotString();
+	}
+
+	public String getOriginalNotString() {
 		return originalNotString;
 	}
 

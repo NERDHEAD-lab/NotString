@@ -35,10 +35,19 @@ public class NotStringTest {
 	}
 
 	@Test
-	public void configsTest() {
+	public void setWhatIsNotTest() {
 		NotString.DEFAULT_CONFIGS
-				.setWhatIsNot(NotStringType.NULLABLE, "${", "}") //null일 경우 ${name}으로 표시
-				.setWhatIsNot(NotStringType.NOTNULL, "#{", "}"); //null일 경우 NotStringIsNullException 발생
+				.setWhatIsNot(NotStringType.NULLABLE, "${{", "}}")
+				.setWhatIsNot(NotStringType.NOTNULL, "#{{", "}}");
+
+		String testString = "this is #{{name}}'s ${{what:story}}";
+		Map<String, String> map = Map.of("name", "nerdlab");
+		NotString<String> notString = NotString.from(testString, map);
+
+		Assertions.assertEquals(
+				"this is nerdlab's story",
+				notString.toString()
+		);
 	}
 
 	//${} -> null일 경우 ${name}으로 표시 (nullable)
@@ -74,6 +83,18 @@ public class NotStringTest {
 		Assertions.assertEquals(
 				"this is #{name}'s ${what}",
 				notString.toNotString()
+		);
+	}
+
+	@Test
+	public void getOriginNotStringTest() {
+		String testString = "this is #{name}'s ${what:story}";
+		Map<String, String> map = Map.of("name", "nerdlab");
+		NotString<String> notString = NotString.from(testString, map);
+
+		Assertions.assertEquals(
+				testString,
+				notString.getOriginalNotString()
 		);
 	}
 
