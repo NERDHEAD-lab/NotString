@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NotStringEnvironment {
-	private final Map<NotStringType, Pair<String>> notStringStartAndEnd =
+	private final Map<NotStringType, Pair<String, String>> notStringStartAndEnd =
 			Arrays.stream(NotStringType.values()).collect(
 					HashMap::new,
 					(map, type) -> map.put(type, type.defualtPair()),
@@ -24,7 +24,7 @@ public class NotStringEnvironment {
 		return this;
 	}
 
-	private Pair<String> pair(NotStringType type) {
+	private Pair<String, String> pair(NotStringType type) {
 		return notStringStartAndEnd.get(type);
 	}
 

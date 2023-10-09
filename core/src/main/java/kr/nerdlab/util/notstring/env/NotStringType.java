@@ -15,7 +15,15 @@ public enum NotStringType {
 		this.end = end;
 	}
 
-	public Pair<String> defualtPair() {
+	public String getStart() {
+		return start;
+	}
+
+	public String getEnd() {
+		return end;
+	}
+
+	public Pair<String, String> defualtPair() {
 		return Pair.of(start, end);
 	}
 }

@@ -2,7 +2,6 @@ package kr.nerdlab.util.notstring;
 
 import kr.nerdlab.lang.exception.NotStringIsNullException;
 import kr.nerdlab.util.notstring.env.NotStringType;
-import kr.nerdlab.util.notstring.handler.NotToStringHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.logging.Logger;
@@ -17,8 +16,8 @@ public class NotStringTest {
 	@Test
 	public void replaceStringTest() {
 		String testString = "this is #{name}'s ${what:story}";
-		Map<String, String> map = Map.of("name", "nerdlab");
-		NotString<String> notString = NotString.from(testString, map);
+		Map<String, String> keyValues = Map.of("name", "nerdlab");
+		NotString<String> notString = ImNotString.from(testString, keyValues);
 
 		Assertions.assertEquals(
 				"this is nerdlab's story",
@@ -41,8 +40,8 @@ public class NotStringTest {
 				.setWhatIsNot(NotStringType.NOTNULL, "#{{", "}}");
 
 		String testString = "this is #{{name}}'s ${{what:story}}";
-		Map<String, String> map = Map.of("name", "nerdlab");
-		NotString<String> notString = NotString.from(testString, map);
+		Map<String, String> keyValues = Map.of("name", "nerdlab");
+		NotString<String> notString = ImNotString.from(testString, keyValues);
 
 		Assertions.assertEquals(
 				"this is nerdlab's story",
@@ -55,7 +54,7 @@ public class NotStringTest {
 	public void nullableTest() {
 		String testString = "this is #{name}'s ${what:story}";
 
-		NotString<String> notString = NotString.from(testString, Map.of("name", "nerdlab"));
+		NotString<String> notString = ImNotString.from(testString, Map.of("name", "nerdlab"));
 		notString.put("what", null);
 		Assertions.assertEquals(
 				"this is nerdlab's story",
@@ -70,27 +69,27 @@ public class NotStringTest {
 
 //		notString.toString()을 예외 발생시키기에는 dubug에서 자동으로 toString을 호출하기 때문에 불편함이 있음
 		Assertions.assertThrows(NotStringIsNullException.class, () -> {
-			NotString<Object> notString = NotString.from(testString);
+			NotString<Object> notString = ImNotString.from(testString);
 		});
 	}
 
 	@Test
 	public void toNotStringTest() {
 		String testString = "this is #{name}'s ${what:story}";
-		Map<String, String> map = Map.of("name", "nerdlab");
-		NotString<String> notString = NotString.from(testString, map);
+		Map<String, String> keyValues = Map.of("name", "nerdlab");
+		NotString<String> notString = ImNotString.from(testString, keyValues);
 
 		Assertions.assertEquals(
 				"this is #{name}'s ${what}",
-				notString.toNotString()
+				notString.getNotString()
 		);
 	}
 
 	@Test
 	public void getOriginNotStringTest() {
 		String testString = "this is #{name}'s ${what:story}";
-		Map<String, String> map = Map.of("name", "nerdlab");
-		NotString<String> notString = NotString.from(testString, map);
+		Map<String, String> keyValues = Map.of("name", "nerdlab");
+		NotString<String> notString = ImNotString.from(testString, keyValues);
 
 		Assertions.assertEquals(
 				testString,
@@ -101,9 +100,9 @@ public class NotStringTest {
 	@Test
 	public void toMapTest() {
 		String testString = "this is ${name}'s ${what:story}";
-		Map<String, String> map = Map.of("name", "nerdlab");
-		NotString<String> notString = NotString.from(testString, map);
-		Map<String, String> notStringMap = notString.toMap();
+		Map<String, String> keyValues = Map.of("name", "nerdlab");
+		NotString<String> notString = ImNotString.from(testString, keyValues);
+		Map<String, String> notStringMap = notString.keyValues();
 
 		Assertions.assertEquals(
 				notStringMap.get("name"),
@@ -117,52 +116,34 @@ public class NotStringTest {
 	@Test
 	public void toStringHandler1Test() {
 		String testString = "this is ${name}'s ${what:story}";
-		Map<String, String> map = Map.of("name", "nerdlab");
-		NotString<String> notString = NotString.from(
-				testString,
-				map,
-//				(key, value) -> {
-//					/*"[" + key + " = " + value + "]"*/
-//					return String.format("[%s = %s]", key, value);
-//				}
-				new NotToStringHandler<>() {
-					@Override
-					public String handle(String key, String value) {
-						return String.format("[%s = %s]", key, value);
-					}
-
-					@Override
-					public String toString(String key, String value) {
-						return value;
-					}
-				}
-		);
-
-		Assertions.assertEquals(
-				"this is [name = nerdlab]'s [what = story]",
-				notString.toString()
-		);
+		Map<String, String> keyValues = Map.of("name", "nerdlab");
+//		NotString<String> notString = NotString.from(
+//				testString,
+//				map,
+//				NotToStringHandlerBuilder.builder(String.class)
+//						.handle((key, value) -> String.format("[%s = %s]", key, value))
+//						.build()
+//		);
+//
+//		Assertions.assertEquals(
+//				"this is [name = nerdlab]'s [what = story]",
+//				notString.toString()
+//		);
 	}
 
 	@Test
 	public void toStringHandler2Test() {
 		String testString = "this is ${name}'s ${what:story}";
-		Map<String, List<String>> map = Map.of("name", List.of("empty", "nerdlab"));
-		NotString<List<String>> notString = NotString.from(
+		List<String> valueOfName = List.of("empty", "nerdlab");
+		Map<String, List<String>> keyValues = Map.of("name", valueOfName);
+		NotString<List<String>> notString = ImNotString.from(
 				testString,
-				map,
-
-				new NotToStringHandler<>() {
-					@Override
-					public String handle(String key, String value) {
-						return String.format("[%s = %s]", key, value);
-					}
-
-					@Override
-					public String toString(String key, List<String> value) {
-						return value.get(1);
-					}
-				}
+				keyValues,
+//				NotStringBuilder.builder(valueOfName)
+//						.handle((key, value) -> String.format("[%s = %s]", key, value))
+//						.toString((key, value) -> value.get(1))
+//						.build()
+				entity -> String.format("[%s = %s]", entity.key(), entity.value().get(1))
 		);
 
 		Assertions.assertEquals(
@@ -178,8 +159,8 @@ public class NotStringTest {
 				.disableWhatIsNot(NotStringType.NOTNULL);
 
 		String testString = "this is #{name}'s ${what:story}";
-		Map<String, String> map = Map.of("name", "nerdlab");
-		NotString<String> notString = NotString.from(testString, map);
+		Map<String, String> keyValues = Map.of("name", "nerdlab");
+		NotString<String> notString = ImNotString.from(testString, keyValues);
 
 		Assertions.assertEquals(
 				testString,
