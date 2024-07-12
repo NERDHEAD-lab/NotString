@@ -143,7 +143,7 @@ public class NotStringTest {
 //						.handle((key, value) -> String.format("[%s = %s]", key, value))
 //						.toString((key, value) -> value.get(1))
 //						.build()
-				entity -> String.format("[%s = %s]", entity.key(), entity.value().get(1))
+				entity -> String.format("[%s = %s]", entity.key(), entity.originValue().get(1))
 		);
 
 		Assertions.assertEquals(

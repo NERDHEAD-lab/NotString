@@ -50,10 +50,10 @@ public class ImNotString<VALUE> implements NotString<VALUE> {
 		String temp = originalNotString;
 
 		for (NotStringType type : NotStringType.values()) {
-			String start = startWith(type);
-			String end = endWith(type);
+			String start = escapeRegex(startWith(type));
+			String end = escapeRegex(endWith(type));
 
-			String pattern = String.format("%s(?<key>[^:}]+)(?::(?<defaultValue>[^}]+))?%s", escapeRegex(start), escapeRegex(end));
+			String pattern = String.format("%s(?<key>[^:}]+)(?::(?<defaultValue>[^}]+))?%s", start, end);
 			Pattern compile = Pattern.compile(pattern);
 			Matcher matcher = compile.matcher(temp);
 
@@ -182,8 +182,8 @@ public class ImNotString<VALUE> implements NotString<VALUE> {
 				matcher.appendReplacement(
 						sb,
 						Objects.requireNonNull(
-								handle(
-										ImNotStringMetaEntity.from(type, key, keyDefaultValues.get(key), keyValues.get(key))
+								escapeRegex(
+										handle(ImNotStringMetaEntity.from(type, key, keyDefaultValues.get(key), keyValues.get(key)))
 								)
 						)
 				);
@@ -204,23 +204,22 @@ public class ImNotString<VALUE> implements NotString<VALUE> {
 
 		switch (entity.type()) {
 			case NULLABLE:
-				if (entity.value() == null) {
+				if (entity.value() == null && entity.value() == null) {
 					return start + entity.key() + end;
 				}
-				value = valueHandler.handle(entity);
-				if (value == null) {
+				if ((entity.value() == null || (value = valueHandler.handle(entity)) == null) && (value = entity.value()) == null) {
 					value = "null";
 				}
 				break;
 			case NOTNULL:
-				if (entity.value() == null) {
+				if (entity.value() == null && entity.value() == null) {
 					throw new NotStringIsNullException(String.format("NotString value is null: %s%s%s", start, entity.key(), end));
 				} else {
-					value = valueHandler.handle(entity);
-					if (value == null) {
+					if ((entity.value() == null || (value = valueHandler.handle(entity)) == null) && (value = entity.value()) == null) {
 						throw new NotStringIsNullException(String.format("NotString value handler return null. return value cannot be null: %s%s%s", start, entity.key(), end));
 					}
 				}
+				break;
 			default:
 				throw new RuntimeException("NotStringType is not defined");
 		}
