@@ -1,6 +1,4 @@
-package kr.nerdlab.util.notstring;
-
-import kr.nerdlab.util.notstring.framework.NotStringFactory;
+package kr.nerdlab.util;
 
 public interface NotString {
 	void put(Object object);

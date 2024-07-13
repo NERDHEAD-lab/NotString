@@ -1,4 +1,4 @@
-package kr.nerdlab.util.notstring;
+package kr.nerdlab.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class NotStringImpl implements NotString {
+class NotStringImpl implements NotString {
 	private final String template;
 	private final Map<String, JsonElement> context = new HashMap<>();
 	private final Gson gson = new Gson();
