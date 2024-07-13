@@ -81,10 +81,33 @@ public class NotStringTest {
 
 	@Test
 	public void testNullField() {
-		NotString nstr = NotString.of("안녕 나는 ${user.name}이고, 내 나이는 ${user.age}이고, 내 성별은 ${user.gender}야.");
+		NotString nstr = NotString.of("안녕 나는 ${user.name}이고, 내 나이는 ${user.age}이고, 내 성별은 ${user.gender}이야.");
 		nstr.put(new User("류주성", 26, null));
 
-		String expected = "안녕 나는 류주성이고, 내 나이는 26이고, 내 성별은 null야.";
+		String expected = "안녕 나는 류주성이고, 내 나이는 26이고, 내 성별은 null이야.";
+		String result = nstr.toString();
+		Assertions.assertEquals(expected, result);
+	}
+
+	@Test
+	public void testComplicatedObject() {
+		NotString nstr = NotString.of(
+				"안녕 나는 ${user.name}이고, " +
+						"내 나이는 ${user.age}이고, " +
+						"내 성별은 ${user.gender}이야. " +
+						"내가 가지고 있는 리스트는 " +
+						"${user.testList[0].key}이고, " +
+						"그리고 ${user.testList[1].key[0]}와 ${user.testList[1].key[1]}가 있다."
+		);
+		List<Map<String, Object>> maps = List.of(
+				Map.of("key", "value"),
+				Map.of("key", List.of("value1", "value2"))
+		);
+		nstr.put(
+				new User("류주성", 26, "남", maps)
+		);
+
+		String expected = "안녕 나는 류주성이고, 내 나이는 26이고, 내 성별은 남이야. 내가 가지고 있는 리스트는 value이고, 그리고 value1와 value2가 있다.";
 		String result = nstr.toString();
 		Assertions.assertEquals(expected, result);
 	}

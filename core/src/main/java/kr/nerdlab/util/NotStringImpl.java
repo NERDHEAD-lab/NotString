@@ -3,7 +3,6 @@ package kr.nerdlab.util;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +14,7 @@ class NotStringImpl implements NotString {
 	private final Map<String, JsonElement> context = new HashMap<>();
 	private final Gson gson = new Gson();
 
-	public NotStringImpl(String template) {
+	NotStringImpl(String template) {
 		this.template = template;
 	}
 
@@ -37,53 +36,47 @@ class NotStringImpl implements NotString {
 
 	@Override
 	public String getVar(String var) throws IndexOutOfBoundsException {
-		Pattern pattern = Pattern.compile("(\\w+)\\[(\\d+)\\]\\.(\\w+)");
-		Matcher matcher = pattern.matcher(var);
-		if (matcher.matches()) {
-			String arrayName = matcher.group(1);
-			int index = Integer.parseInt(matcher.group(2));
-			String fieldName = matcher.group(3);
-			if (context.containsKey(arrayName)) {
-				JsonElement jsonElement = context.get(arrayName);
-				if (jsonElement != null && jsonElement.isJsonArray()) {
-					JsonArray jsonArray = jsonElement.getAsJsonArray();
-					if (jsonArray.size() > index) {
-						JsonObject jsonObject = jsonArray.get(index).getAsJsonObject();
-						if (jsonObject.has(fieldName)) {
-							JsonElement fieldElement = jsonObject.get(fieldName);
-							return fieldElement.isJsonNull() ? "null" : fieldElement.getAsString();
-						}
-						return "null";
-					} else {
-						throw new IndexOutOfBoundsException("Index " + index + " is out of range for array " + arrayName);
-					}
-				}
+		String[] parts = var.split("\\.");
+		JsonElement element = context.get(parts[0]);
+		for (int i = 1; i < parts.length; i++) {
+			if (element == null || element.isJsonNull()) {
+				return "null";
 			}
-		} else {
-			String[] parts = var.split("\\.");
-			if (parts.length == 2) {
-				String objectName = parts[0];
-				String fieldName = parts[1];
-				if (context.containsKey(objectName)) {
-					JsonElement jsonElement = context.get(objectName);
-					if (jsonElement != null && jsonElement.isJsonObject()) {
-						JsonObject jsonObject = jsonElement.getAsJsonObject();
-						if (jsonObject.has(fieldName)) {
-							JsonElement fieldElement = jsonObject.get(fieldName);
-							return fieldElement.isJsonNull() ? "null" : fieldElement.getAsString();
+
+			Matcher matcher = Pattern.compile("(\\w+)\\[(\\d+)]").matcher(parts[i]);
+			if (matcher.matches()) {
+				String arrayName = matcher.group(1);
+				int index = Integer.parseInt(matcher.group(2));
+				if (element.isJsonObject() && element.getAsJsonObject().has(arrayName)) {
+					element = element.getAsJsonObject().get(arrayName);
+					if (element.isJsonArray()) {
+						JsonArray jsonArray = element.getAsJsonArray();
+						if (index < jsonArray.size()) {
+							element = jsonArray.get(index);
+						} else {
+							throw new IndexOutOfBoundsException("Index " + index + " is out of range for array " + arrayName);
 						}
+					} else {
 						return "null";
 					}
+				} else {
+					return "null";
+				}
+			} else {
+				if (element.isJsonObject()) {
+					element = element.getAsJsonObject().get(parts[i]);
+				} else {
+					return "null";
 				}
 			}
 		}
-		return null;
+		return element != null && !element.isJsonNull() ? element.getAsString() : "null";
 	}
 
 	@Override
 	public String toString() {
 		String result = template;
-		Pattern pattern = Pattern.compile("\\$\\{(.+?)\\}");
+		Pattern pattern = Pattern.compile("\\$\\{(.+?)}");
 		Matcher matcher = pattern.matcher(template);
 
 		while (matcher.find()) {
