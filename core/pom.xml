@@ -27,6 +27,11 @@
             <artifactId>jackson-databind</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.epapyrus.common</groupId>
+            <artifactId>http-daemon</artifactId>
+            <version>3.0.0-RELEASE</version>
+        </dependency>
     </dependencies>
 
 </project>
